@@ -1,0 +1,25 @@
+Import('env')
+
+sources = Glob('*.cpp') + Glob('*/*.cpp') + Glob('*/*/*.cpp')+ Glob('*/*/*/*.cpp')
+header_files = Glob('*.hh') + Glob('*/*.hh') + Glob('*/*/*.hh')+ Glob('*/*/*/*.hh')
+
+# SFML paths
+sfml_path = "../thirdparty/SFML-3.0.0"
+
+# SFML libraries to link
+sfml_libs = ["sfml-graphics", "sfml-window", "sfml-system"]
+
+# Compiler flags
+env.Append(CXXFLAGS=["-std=c++17"])
+env.Append(CPPPATH=[".", f"{sfml_path}/include"])
+env.Append(LIBPATH=[f"{sfml_path}/lib"])
+
+# Compile all cpp files in src directory
+for src in sources:
+	target = src.name.rsplit('.', 1)[0]
+	# Build the program
+	env.Program(
+		target=target,
+		source=src,
+		LIBS=sfml_libs
+	)
