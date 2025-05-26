@@ -2,6 +2,8 @@
 #include "core/visualize/VisualBezier.hh"
 #include "core/visualize/VisualLine.hh"
 #include "core/visualize/abstracts/VisualCurve.hh"
+#include "core/render/RendererFactory.hh"
+#include "core/render/context/SvgRenderContext.hh"
 #include "ui/components/Button.hh"
 #include "ui/components/Pane.hh"
 #include <SFML/Graphics.hpp>
@@ -16,8 +18,9 @@ Pane1(PaneSharedPtr global_pane, size_t id)
 {
     PaneRawPtr pane = reinterpret_cast<PaneRawPtr>(global_pane->get(id));
     pane->create<VisualLine>(
-        Point(0.f, 0.f),
-        Point(pane->getWeight(), pane->getHeight())
+        Point(0.f, 0.f)
+      , Point(pane->getWeight(), pane->getHeight())
+      , RendererFactory::create(CurveRenderScheme::Green)
     );
 }
 
@@ -26,10 +29,11 @@ Pane2(PaneSharedPtr global_pane, size_t id)
 {
     PaneRawPtr pane = reinterpret_cast<PaneRawPtr>(global_pane->get(id));
     pane->create<VisualBezier>(
-        Point(0.f, pane->getHeight()),
-        Point(pane->getWeight(), 0.f),
-        Point(130.0f, -5.0f),
-        Point(-30.0f, 15.0f)
+        Point(0.f, pane->getHeight())
+      , Point(pane->getWeight(), 0.f)
+      , Point(130.0f, -5.0f)
+      , Point(-30.0f, 15.0f)
+      , RendererFactory::create(CurveRenderScheme::DashedBlack)
     );
 }
 
@@ -70,27 +74,39 @@ generateWindowObjects(PaneSharedPtr pane, size_t& pane1Id, size_t& pane2Id) {
     // Create panes
     const sf::Vector2f pane1Pos{margin, paneY};
     pane1Id = pane->create<Pane>(
-        pane1Pos,
-        sf::Vector2f{paneWidth, paneHeight},
-        sf::Color::White,
-        3.f
+        pane1Pos
+      , sf::Vector2f{paneWidth, paneHeight}
+      , sf::Color::Black
+      , 3.f
     );
-    reinterpret_cast<Pane*>(pane->get(pane1Id))->setString("Visualization Scheme 1");
+    auto p1 = reinterpret_cast<Pane*>(pane->get(pane1Id));
+    p1->setString("Visualization Scheme 1");
 
     const sf::Vector2f pane2Pos{paneWidth + 3 * margin, paneY};
     pane2Id = pane->create<Pane>(
-        pane2Pos,
-        sf::Vector2f{paneWidth, paneHeight},
-        sf::Color::White,
-        3.f
+        pane2Pos
+      , sf::Vector2f{paneWidth, paneHeight}
+      , sf::Color::Black
+      , 3.f
     );
-    reinterpret_cast<Pane*>(pane->get(pane2Id))->setString("Visualization Scheme 2");
+    auto p2 = reinterpret_cast<Pane*>(pane->get(pane2Id));
+    p2->setString("Visualization Scheme 2");
 
     btn->setOnClick([pane, pane1Id, pane2Id, btn1, btn2](){
         Pane1(pane, pane1Id);
         btn1->activate();
         Pane2(pane, pane2Id);
         btn2->activate();
+    });
+
+    btn1->setOnClick([width, height, p1]() {
+        SvgRenderContext svgCtx("pane1.svg", width, height);
+        p1->Draw(svgCtx);
+    });
+
+    btn2->setOnClick([width, height, p2]() {
+        SvgRenderContext svgCtx("pane2.svg", width, height);
+        p2->Draw(svgCtx);
     });
 }
 
@@ -99,12 +115,13 @@ main()
 {
     unsigned int width = 1200, height = 720;
     sf::RenderWindow window(sf::VideoMode({width, height}), "Arch");
+    SfmlRenderContext ctx(window);
 
     PaneSharedPtr pane = std::make_shared<Pane>(
-        sf::Vector2f{0, 0},
-        sf::Vector2f{static_cast<float>(width), static_cast<float>(height)},
-        sf::Color::Red,
-        3.f
+        sf::Vector2f{0, 0}
+      , sf::Vector2f{static_cast<float>(width), static_cast<float>(height)}
+      , sf::Color::Red
+      , 3.f
     );
 
     size_t pane1Id, pane2Id;
@@ -120,9 +137,9 @@ main()
             window.close();
         }
 
-        pane->Draw(window);
+        pane->Draw(ctx);
 
         window.display();
-        window.clear();
+        window.clear(sf::Color::White);
     }
 }

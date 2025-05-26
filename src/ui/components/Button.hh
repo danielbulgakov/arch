@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include "core/visualize/interfaces/IDrawable.hh"
+#include "core/render/context/SfmlRenderContext.hh"
 #include "ui/components/interfaces/IEventable.hh"
 #include "ui/components/abstract/APositionable.hh"
 #include "ui/components/abstract/ACallbackable.hh"
@@ -42,22 +43,23 @@ class Button
         , ABorderable(colorBorder, borderThickness)
     {}
 
-    void Draw(sf::RenderTarget& target,
+    void Draw(IRenderContext& ctx,
               const sf::Vector2f& transform = {0, 0},
               const size_t segments = 100) override
     {
+        auto target = reinterpret_cast<SfmlRenderContext&>(ctx);
         sf::Vector2f globalPos = position + transform;
         sf::RectangleShape rect(size);
         rect.setPosition(globalPos);
-        rect.setFillColor(isActive && isMouseHovered(target) ? colorFill : colorFillOnHover);
+        rect.setFillColor(isActive && isMouseHovered(target.getTarget()) ? colorFill : colorFillOnHover);
         rect.setOutlineColor(colorBorder);
         rect.setOutlineThickness(borderThickness);
-        target.draw(rect);
+        ctx.draw(rect);
 
         sf::FloatRect textBounds = text.getLocalBounds();
         text.setPosition({position.x + (size.x - textBounds.size.x) / 2.f,
                          position.y + (size.y - textBounds.size.y) / 2.f});
-        target.draw(text);
+        ctx.draw(text);
     }
 
     void HandleEvent(sf::RenderTarget& target, const sf::Event& event) override {
