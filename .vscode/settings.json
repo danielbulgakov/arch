@@ -114,6 +114,14 @@
     "typeinfo": "cpp",
     "variant": "cpp",
     "fstream": "cpp",
-    "cinttypes": "cpp"
+    "cinttypes": "cpp",
+    "iostream": "cpp",
+    "cassert": "cpp",
+    "cerrno": "cpp",
+    "climits": "cpp",
+    "filesystem": "cpp",
+    "ios": "cpp",
+    "locale": "cpp",
+    "queue": "cpp"
   }
 }

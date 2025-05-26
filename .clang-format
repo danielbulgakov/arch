@@ -14,7 +14,6 @@ BreakBeforeBinaryOperators: false
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
 BinPackParameters: true
-BinPackArguments: true
 ColumnLimit: 119
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 DerivePointerBinding: true
@@ -23,7 +22,7 @@ IndentCaseLabels: true
 MaxEmptyLinesToKeep: 4
 NamespaceIndentation: None
 ObjCSpaceBeforeProtocolList: false
-PenaltyBreakBeforeFirstCallParameter: 1
+PenaltyBreakBeforeFirstCallParameter: 1000
 PenaltyBreakComment: 60
 PenaltyBreakString: 1000
 PenaltyBreakFirstLessLess: 119
@@ -49,7 +48,7 @@ BreakBeforeBraces: Custom
 BraceWrapping:
   AfterClass:      true
   AfterStruct:     true
-  AfterFunction:     true
-  AfterNamespace:     true
+  AfterFunction:   true
+  AfterNamespace:  true
 BreakConstructorInitializers: BeforeColon
 PackConstructorInitializers: BinPack
