@@ -6,6 +6,7 @@
 #include "core/render/context/SvgRenderContext.hh"
 #include "core/objects/decorators/Fragment.hh"
 #include "core/objects/decorators/MoveTo.hh"
+#include "core/objects/composite/Chain.hh"
 #include "ui/components/Button.hh"
 #include "ui/components/Pane.hh"
 #include <SFML/Graphics.hpp>
@@ -49,6 +50,55 @@ Pane2(PaneSharedPtr global_pane, size_t id)
 {
     PaneRawPtr pane = reinterpret_cast<PaneRawPtr>(global_pane->get(id));
 
+    auto base1 = std::make_unique<Bezier>(
+        Point(100.f, 100.f),
+        Point(150.f, 150.f),
+        Point(40.f, -20.f),
+        Point(-50.f, 40.f)
+    );
+
+    auto base2 = std::make_unique<Bezier>(
+        Point(0.f, 0.f),
+        Point(60.f, -10.f),
+        Point(80.f, 90.f),
+        Point(100.f, 20.f)
+    );
+
+    auto base3 = std::make_unique<Bezier>(
+        Point(0.f, 0.f),
+        Point(-60.f, 30.f),
+        Point(70.f, -50.f),
+        Point(90.f, 30.f)
+    );
+
+    auto frag1 = std::make_unique<Fragment>(base1->clone(), 0.0, 1.0);
+    auto end1 = base1->getPoint(1.0);
+
+    auto moved2 = std::make_unique<MoveTo>(
+        std::make_unique<Fragment>(base2->clone(), 0.0, 1.0),
+        *end1
+    );
+    auto end2 = moved2->getPoint(1.0);
+
+    auto moved3 = std::make_unique<MoveTo>(
+        std::make_unique<Fragment>(base3->clone(), 0.0, 1.0),
+        *end2
+    );
+
+    auto chain12 = std::make_unique<Chain>(
+        std::move(frag1),
+        std::move(moved2)
+    );
+
+    auto full_chain = std::make_unique<Chain>(
+        std::move(chain12),
+        std::move(moved3)
+    );
+
+    pane->create<VisualCurve>(
+        std::move(full_chain),
+        RendererFactory::create(CurveRenderScheme::Green)
+    );
 }
 
 void
