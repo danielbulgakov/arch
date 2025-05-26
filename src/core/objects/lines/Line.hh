@@ -13,6 +13,10 @@ class Line : public ACurve
   public:
     Line(const IPoint& a, const IPoint& b) : ACurve(a, b) {}
 
+    Line(const Line& other)
+        : ACurve(*other.a, *other.b)
+    {}
+
     std::unique_ptr<IPoint> getPoint(double t) override
     {
         t = std::clamp(t, 0.0, 1.0);
@@ -21,6 +25,10 @@ class Line : public ACurve
         double y = lineFunc(t, a->getY(), b->getY());
 
         return std::make_unique<Point>(x, y);
+    }
+
+    std::unique_ptr<ICurve> clone() const {
+        return std::make_unique<Line>(*this);
     }
 };
 

@@ -13,6 +13,13 @@ class VisualLine : public VisualCurve {
         : VisualCurve(std::make_unique<Line>(a, b), renderer, color) 
     {}
 
+    VisualLine(std::unique_ptr<Line> line
+              , std::shared_ptr<ICurveRenderer> renderer
+              , sf::Color color = sf::Color::Green
+    )
+        : VisualCurve(std::move(line), renderer, color) 
+    {}
+
     void Draw(IRenderContext& ctx
             , const sf::Vector2f& transform = {0,0}
             , const size_t segments = 1

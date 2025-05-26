@@ -11,6 +11,7 @@ class ACurve : public ICurve
 
   public:
     ACurve(const IPoint& a, const IPoint& b) : a(a.clone()), b(b.clone()) {}
+    virtual std::unique_ptr<ICurve> clone() const = 0;
 };
 
 #endif // ACURVE

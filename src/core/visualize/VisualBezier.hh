@@ -13,6 +13,13 @@ class VisualBezier : public VisualCurve {
     )
         : VisualCurve(std::make_unique<Bezier>(a, b, c, d), renderer, color) 
     {}
+
+    VisualBezier(std::unique_ptr<Bezier> bezier
+              , std::shared_ptr<ICurveRenderer> renderer
+              , sf::Color color = sf::Color::Cyan
+    )
+        : VisualCurve(std::move(bezier), renderer, color) 
+    {}
 };
 
 

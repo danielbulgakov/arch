@@ -10,6 +10,7 @@ class ICurve
     virtual ~ICurve() = default;
 
     virtual std::unique_ptr<IPoint> getPoint(double t) = 0;
+    virtual std::unique_ptr<ICurve> clone() const = 0;
 };
 
 #endif // ICURVE

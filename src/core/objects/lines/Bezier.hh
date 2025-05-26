@@ -25,6 +25,11 @@ class Bezier : public ACurve
     {
     }
 
+    Bezier(const Bezier& other)
+        : ACurve(*other.a, *other.b)
+        , c(other.c->clone())
+        , d(other.d->clone()) {}
+
     std::unique_ptr<IPoint> getPoint(double t) override
     {
         t = std::clamp(t, 0.0, 1.0);
@@ -33,6 +38,10 @@ class Bezier : public ACurve
         double y = bezierFunc(t, a->getY(), b->getY(), c->getY(), d->getY());
 
         return std::make_unique<Point>(x, y);
+    }
+
+    std::unique_ptr<ICurve> clone() const {
+        return std::make_unique<Bezier>(*this);
     }
 };
 

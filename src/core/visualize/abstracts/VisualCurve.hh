@@ -2,7 +2,7 @@
 #define VISUALCURVE
 
 #include "core/visualize/interfaces/IDrawable.hh"
-#include "core/objects/abstracts/ACurve.hh"
+#include "core/objects/interfaces/ICurve.hh"
 #include "core/render/interfaces/ICurveRenderer.hh"
 
 class VisualCurve
@@ -10,13 +10,13 @@ class VisualCurve
     , public ICurve
 {
   protected:
-    std::unique_ptr<ACurve> curve;
+    std::unique_ptr<ICurve> curve;
     std::shared_ptr<ICurveRenderer> renderer;
     sf::Color color;
     size_t preferred_seg_num = 100;
 
   public:
-    VisualCurve(std::unique_ptr<ACurve> curve
+    VisualCurve(std::unique_ptr<ICurve> curve
               , std::shared_ptr<ICurveRenderer> renderer
               , sf::Color color = sf::Color::Black
     )
@@ -25,6 +25,13 @@ class VisualCurve
         , color(color)
     {
     }
+
+    VisualCurve(const VisualCurve& other)
+        : curve(other.curve ? other.curve->clone() : nullptr)
+        , renderer(other.renderer)
+        , color(other.color)
+        , preferred_seg_num(other.preferred_seg_num)
+    {}
 
     void setRenderer(std::shared_ptr<ICurveRenderer> newRenderer) {
         renderer = std::move(newRenderer);
@@ -38,18 +45,22 @@ class VisualCurve
     ) override
     {
         std::vector<sf::Vector2f> points;
-        for (size_t i = 0; i <= segments; ++i) {
+        for (size_t i = 0; i <= segments; i++) {
             double t = static_cast<double>(i) / segments;
             auto p = getPoint(t);
             points.emplace_back(p->getX() + transform.x, p->getY() + transform.y);
         }
 
-        for (size_t i = 0; i < segments; ++i) {
+        for (size_t i = 0; i < segments; i++) {
             renderer->drawSegment(ctx, points[i], points[i + 1]);
         }
 
         renderer->drawStartPoint(ctx, points.front());
         renderer->drawEndPoint(ctx, points.back());
+    }
+
+    std::unique_ptr<ICurve> clone() const override {
+        return std::make_unique<VisualCurve>(*this);
     }
 };
 

@@ -4,6 +4,8 @@
 #include "core/visualize/abstracts/VisualCurve.hh"
 #include "core/render/RendererFactory.hh"
 #include "core/render/context/SvgRenderContext.hh"
+#include "core/objects/decorators/Fragment.hh"
+#include "core/objects/decorators/MoveTo.hh"
 #include "ui/components/Button.hh"
 #include "ui/components/Pane.hh"
 #include <SFML/Graphics.hpp>
@@ -17,10 +19,28 @@ void
 Pane1(PaneSharedPtr global_pane, size_t id)
 {
     PaneRawPtr pane = reinterpret_cast<PaneRawPtr>(global_pane->get(id));
-    pane->create<VisualLine>(
-        Point(0.f, 0.f)
-      , Point(pane->getWeight(), pane->getHeight())
-      , RendererFactory::create(CurveRenderScheme::Green)
+
+    auto base1 = std::make_unique<Bezier>(
+        Point(400.f, 400.f),
+        Point(pane->getWeight() / 2 - 50, pane->getHeight() / 2 - 50),
+        Point(40.f, -20.f),
+        Point(-50.f, 40.f)
+    );
+
+    auto fragment = std::make_unique<Fragment>(base1->clone(), 1, 0);
+    fragment = std::make_unique<Fragment>(fragment->clone(), 0, 0.5);
+
+    auto new_start = std::make_unique<Point>(400.f, 400.f);
+    auto moved = std::make_unique<MoveTo>(std::move(fragment), *new_start);
+
+    pane->create<VisualCurve>(
+        std::move(moved),
+        RendererFactory::create(CurveRenderScheme::Green)
+    );
+
+    pane->create<VisualCurve>(
+        std::move(base1),
+        RendererFactory::create(CurveRenderScheme::Green)
     );
 }
 
@@ -28,13 +48,7 @@ void
 Pane2(PaneSharedPtr global_pane, size_t id)
 {
     PaneRawPtr pane = reinterpret_cast<PaneRawPtr>(global_pane->get(id));
-    pane->create<VisualBezier>(
-        Point(0.f, pane->getHeight())
-      , Point(pane->getWeight(), 0.f)
-      , Point(130.0f, -5.0f)
-      , Point(-30.0f, 15.0f)
-      , RendererFactory::create(CurveRenderScheme::DashedBlack)
-    );
+
 }
 
 void
