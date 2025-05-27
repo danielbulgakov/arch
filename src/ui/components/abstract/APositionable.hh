@@ -23,10 +23,7 @@ class APositionable
     float getHeight() { return size.y; }
     float getWeight() { return size.x; }
 
-    bool isPointInside(sf::Vector2f point) const {
-        return point.x >= position.x && point.x <= position.x + size.x &&
-               point.y >= position.y && point.y <= position.y + size.y;
-    }
+    virtual bool isPointInside(sf::Vector2f point) const = 0;
 
     bool isMouseHovered(sf::RenderTarget& target) {
         const sf::Window* window = dynamic_cast<const sf::Window*>(&target);

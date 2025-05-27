@@ -30,6 +30,11 @@ class Pane
         , ATextable(fontSize, str, colorText)
     {}
 
+    bool isPointInside(sf::Vector2f point) const override {
+        return point.x >= position.x && point.x <= position.x + size.x &&
+               point.y >= position.y && point.y <= position.y + size.y;
+    }
+
     void Draw(IRenderContext& ctx,
               const sf::Vector2f& transform = {0, 0},
               const size_t segments = 100) override

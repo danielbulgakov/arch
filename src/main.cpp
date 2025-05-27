@@ -198,7 +198,7 @@ main()
             }
 
             if (event->is<sf::Event::Closed>())
-            window.close();
+                window.close();
         }
 
         pane->Draw(ctx);

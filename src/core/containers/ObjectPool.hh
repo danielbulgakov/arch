@@ -55,7 +55,6 @@ class ObjectPool
     {
         auto it = pool.find(id);
         if (it != pool.end()) {
-            // remove from eventables if it's there
             IEventable* eventable = dynamic_cast<IEventable*>(it->second.get());
             if (eventable) {
                 auto ev_it = std::remove(eventables.begin(), eventables.end(), eventable);

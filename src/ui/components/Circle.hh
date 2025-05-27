@@ -1,75 +1,83 @@
-#ifndef BUTTON
-#define BUTTON
+#ifndef CIRCLE
+#define CIRCLE
 
-#include <SFML/Graphics.hpp>
-#include "core/visualize/interfaces/IDrawable.hh"
+#include <cmath>
 #include "core/render/context/SfmlRenderContext.hh"
+#include "core/visualize/interfaces/IDrawable.hh"
 #include "ui/components/interfaces/IEventable.hh"
 #include "ui/components/abstract/APositionable.hh"
-#include "ui/components/abstract/ACallbackable.hh"
 #include "ui/components/abstract/AFillColor.hh"
-#include "ui/components/abstract/ATextable.hh"
+#include "ui/components/abstract/ACallbackable.hh"
 #include "ui/components/abstract/ABorderable.hh"
 
-class Button
+class Circle
     : public IDrawable
     , public IEventable
     , public APositionable
-    , public ACallbackable
     , public AFillColor
-    , public ATextable
+    , public ACallbackable
     , public ABorderable
 {
-
+    sf::Color colorFillDefault;
   public:
-    Button(
+    Circle(
         // APositionable
         const sf::Vector2f& position
         , const sf::Vector2f& size
         // AFillColor
-        , sf::Color colorFill = sf::Color(200, 200, 200)
-        , sf::Color colorFillOnHover = sf::Color(150, 150, 150)
-        // ATextable
-        , unsigned int fontSize = 20.f
-        , const std::string& str = "Text"
-        , sf::Color colorText = sf::Color::Black
+        , sf::Color colorFill = sf::Color::White
         // ABorderable
         , sf::Color colorBorder = sf::Color::Black
         , float borderThickness = 2.f
     )
         : APositionable(position, size)
-        , AFillColor(colorFill, colorFillOnHover)
-        , ATextable(fontSize, str, colorText)
+        , AFillColor(colorFill)
         , ABorderable(colorBorder, borderThickness)
-    {}
+    {
+        colorFillDefault = colorFill;
+
+        setOnHover([this]() {
+            if (!isDragging) setColorFill(colorFillOnHover);
+        });
+
+        setOnClick([this]() {
+            drag();
+            setColorFill(colorFillOnDrag);
+        });
+
+        setOnRelease([this, colorFill]() {
+            dragEnd();
+            setColorFill(colorFill);
+        });
+    }
 
     bool isPointInside(sf::Vector2f point) const override {
-        return point.x >= position.x && point.x <= position.x + size.x &&
-               point.y >= position.y && point.y <= position.y + size.y;
+        return std::hypot(point.x - (position.x + size.x), point.y - (position.y + size.y)) <= std::max(size.x, size.y);
     }
 
     void Draw(IRenderContext& ctx,
               const sf::Vector2f& transform = {0, 0},
               const size_t segments = 100) override
     {
-        auto target = reinterpret_cast<SfmlRenderContext&>(ctx);
+        auto& sfmlCtx = reinterpret_cast<SfmlRenderContext&>(ctx);
+        sf::CircleShape circle(std::max(size.x, size.y));
         sf::Vector2f globalPos = position + transform;
-        sf::RectangleShape rect(size);
-        rect.setPosition(globalPos);
-        rect.setFillColor(isActive && isMouseHovered(target.getTarget()) ? colorFill : colorFillOnHover);
-        rect.setOutlineColor(colorBorder);
-        rect.setOutlineThickness(borderThickness);
-        ctx.draw(rect);
+        circle.setPosition(globalPos);
+        circle.setFillColor(colorFill);
+        circle.setOutlineColor(colorBorder);
+        circle.setOutlineThickness(borderThickness);
 
-        sf::FloatRect textBounds = text.getLocalBounds();
-        text.setPosition({position.x + (size.x - textBounds.size.x) / 2.f,
-                         position.y + (size.y - textBounds.size.y) / 2.f});
-        ctx.draw(text);
+        sfmlCtx.draw(circle);
     }
 
     void HandleEvent(sf::RenderTarget& target, const sf::Event& event) override {
         sf::Vector2f mousePos = target.mapPixelToCoords(sf::Mouse::getPosition());
         bool isHovered = isPointInside(mousePos);
+        if (isMouseHovered(target)) {
+            this->invokeHover();
+        } else {
+            setColorFill(colorFillDefault);
+        }
         if (event.is<sf::Event::MouseButtonPressed>()) {
             const auto* mouse = event.getIf<sf::Event::MouseButtonPressed>();
 
@@ -81,4 +89,4 @@ class Button
     }
 };
 
-#endif // BUTTON
+#endif // CIRCLE
